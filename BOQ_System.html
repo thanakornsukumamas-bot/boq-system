@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIQ BOQ System — ใบประมาณราคาก่อสร้าง</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1B2A4A;
+    --teal:   #0D6E6E;
+    --gold:   #C8963E;
+    --gold2:  #E8B45A;
+    --ltblue: #DCE9F8;
+    --green:  #EAF5EA;
+    --red:    #FFF0F0;
+    --bg:     #F0F3F8;
+    --surface:#FFFFFF;
+    --border: #CBD5E1;
+    --text:   #1E293B;
+    --muted:  #64748B;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    --shadow-lg: 0 4px 6px rgba(0,0,0,.05), 0 10px 40px rgba(0,0,0,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── TOP BAR ────────────────────────────────────────── */
+  .topbar {
+    background: var(--navy);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .topbar-logo {
+    width: 32px; height: 32px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--navy); font-size: 14px;
+    letter-spacing: -0.5px;
+  }
+  .topbar-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: .3px;
+  }
+  .topbar-sub { color: #94A3B8; font-size: 12px; margin-top: 1px; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.2); }
+  .btn-gold {
+    background: var(--gold);
+    color: var(--navy);
+  }
+  .btn-gold:hover { background: var(--gold2); transform: translateY(-1px); }
+  .btn-danger {
+    background: #DC2626;
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  .btn-danger:hover { background: #B91C1C; }
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+  .btn-teal {
+    background: var(--teal);
+    color: #fff;
+  }
+  .btn-teal:hover { background: #0A5757; }
+
+  /* ── PROJECT INFO BAR ───────────────────────────────── */
+  .project-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .pfield {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .pfield label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .pfield input {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    padding: 5px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    background: var(--bg);
+    color: var(--text);
+    min-width: 180px;
+    transition: border .15s;
+  }
+  .pfield input:focus { border-color: var(--teal); background: #fff; }
+  .pfield-wide input { min-width: 260px; }
+
+  /* ── MAIN LAYOUT ────────────────────────────────────── */
+  .main-wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ── TABLE CARD ─────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--navy);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-header h2 {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .badge {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  /* ── BOQ TABLE ──────────────────────────────────────── */
+  .boq-scroll { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr {
+    background: #F8FAFC;
+    border-bottom: 2px solid var(--border);
+  }
+  thead th {
+    padding: 10px 10px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  thead th.num { text-align: right; }
+  thead th.ctr { text-align: center; }
+  tbody tr {
+    border-bottom: 1px solid #F1F5F9;
+    transition: background .1s;
+  }
+  tbody tr:hover { background: #F8FAFC; }
+  tbody tr.empty-row { opacity: .4; }
+  td {
+    padding: 8px 10px;
+    vertical-align: middle;
+  }
+  td.seq {
+    color: var(--muted);
+    font-size: 12px;
+    width: 36px;
+    text-align: center;
+  }
+  td select, td input[type=number], td input[type=text] {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    width: 100%;
+    padding: 5px 8px;
+    border: 1.5px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    outline: none;
+    transition: all .15s;
+    color: var(--text);
+  }
+  td select:hover, td input:hover {
+    border-color: var(--border);
+    background: #F8FAFC;
+  }
+  td select:focus, td input:focus {
+    border-color: var(--teal);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(13,110,110,.1);
+  }
+  td.unit-cell {
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    width: 60px;
+  }
+  td.num-cell {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  td.num-cell.mat { color: var(--teal); }
+  td.num-cell.lab { color: #7C3AED; }
+  td.num-cell.total {
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  td.total-cell-bg {
+    background: var(--ltblue);
+  }
+  td input.qty-input {
+    width: 80px;
+    text-align: right;
+  }
+  td.cat-cell { min-width: 160px; }
+  td.item-cell { min-width: 260px; }
+  .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #CBD5E1;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all .15s;
+    line-height: 1;
+  }
+  .delete-btn:hover { color: #DC2626; background: #FEE2E2; }
+
+  /* ── ADD ROW BUTTON ─────────────────────────────────── */
+  .add-row-wrap {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: #FAFBFC;
+  }
+  .add-row-btn {
+    background: none;
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    width: 100%;
+    padding: 8px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .add-row-btn:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(13,110,110,.04);
+  }
+
+  /* ── SIDEBAR ────────────────────────────────────────── */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── SUMMARY CARD ───────────────────────────────────── */
+  .summary-card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .summary-header {
+    background: var(--teal);
+    padding: 14px 18px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .summary-body { padding: 16px; }
+  .sum-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 13px;
+  }
+  .sum-row:last-child { border-bottom: none; }
+  .sum-label { color: var(--muted); }
+  .sum-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .sum-value.mat { color: var(--teal); }
+  .sum-value.lab { color: #7C3AED; }
+  .sum-grand {
+    margin-top: 12px;
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sum-grand-label {
+    color: rgba(255,255,255,.7);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .sum-grand-value {
+    color: var(--gold2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* ── OVERHEAD SETTINGS ─────────────────────────────── */
+  .settings-card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .settings-header {
+    background: #475569;
+    padding: 12px 18px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .settings-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .setting-label { font-size: 13px; color: var(--text); }
+  .setting-input {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    padding: 5px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    width: 80px;
+    text-align: right;
+    outline: none;
+    transition: border .15s;
+  }
+  .setting-input:focus { border-color: var(--teal); }
+
+  /* ── CATEGORY BREAKDOWN ─────────────────────────────── */
+  .breakdown-card {
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .breakdown-header {
+    background: #334155;
+    padding: 12px 18px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breakdown-body { padding: 12px 14px; }
+  .bk-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 12px;
+    border-bottom: 1px solid #F8FAFC;
+  }
+  .bk-row:last-child { border-bottom: none; }
+  .bk-cat { color: var(--text); font-weight: 500; }
+  .bk-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .bk-bar-wrap {
+    height: 3px; background: #E2E8F0; border-radius: 2px;
+    margin-top: 4px; overflow: hidden;
+  }
+  .bk-bar { height: 100%; background: var(--teal); border-radius: 2px; transition: width .3s; }
+
+  /* ── TOAST ──────────────────────────────────────────── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--navy); color: #fff;
+    padding: 12px 20px; border-radius: 10px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(80px); opacity: 0;
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 1000;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── PRINT ──────────────────────────────────────────── */
+  @media print {
+    .topbar, .project-bar .btn, .delete-btn,
+    .add-row-wrap, .topbar-actions, .settings-card,
+    .btn-ghost, .btn-gold, .btn-teal { display: none !important; }
+    .main-wrap { grid-template-columns: 1fr; }
+    body { background: #fff; }
+  }
+
+  /* ── RESPONSIVE ─────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .main-wrap { grid-template-columns: 1fr; }
+    .sidebar { flex-direction: row; flex-wrap: wrap; }
+    .sidebar > * { flex: 1; min-width: 260px; }
+  }
+  @media (max-width: 600px) {
+    .topbar { padding: 0 12px; }
+    .main-wrap { padding: 12px; }
+    .project-bar { padding: 10px 12px; }
+  }
+
+  /* select arrow */
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 24px; }
+</style>
+</head>
+<body>
+
+<!-- ── TOP BAR ─────────────────────────────────────────── -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">AIQ</div>
+    <div>
+      <div class="topbar-title">BOQ System</div>
+      <div class="topbar-sub">ใบประมาณราคาก่อสร้าง</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="clearAll()">🗑 ล้างข้อมูล</button>
+    <button class="btn btn-ghost" onclick="window.print()">🖨 พิมพ์</button>
+    <button class="btn btn-gold" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+</div>
+
+<!-- ── PROJECT INFO ──────────────────────────────────────── -->
+<div class="project-bar">
+  <div class="pfield pfield-wide">
+    <label>โครงการ / Project</label>
+    <input type="text" id="proj_name" placeholder="ชื่อโครงการ..." oninput="saveProject()">
+  </div>
+  <div class="pfield pfield-wide">
+    <label>ลูกค้า / Client</label>
+    <input type="text" id="proj_client" placeholder="ชื่อลูกค้า..." oninput="saveProject()">
+  </div>
+  <div class="pfield">
+    <label>สถานที่ / Location</label>
+    <input type="text" id="proj_loc" placeholder="สถานที่ก่อสร้าง..." oninput="saveProject()">
+  </div>
+  <div class="pfield">
+    <label>วันที่ / Date</label>
+    <input type="text" id="proj_date" placeholder="วว/ดด/ปปปป" oninput="saveProject()">
+  </div>
+</div>
+
+<!-- ── MAIN ──────────────────────────────────────────────── -->
+<div class="main-wrap">
+
+  <!-- TABLE -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📋 รายการ BOQ <span class="badge" id="row-count">0 รายการ</span></h2>
+      <button class="btn btn-teal btn-sm" onclick="addRow()">+ เพิ่มรายการ</button>
+    </div>
+    <div class="boq-scroll">
+      <table id="boq-table">
+        <thead>
+          <tr>
+            <th class="ctr">#</th>
+            <th>หมวดงาน</th>
+            <th>รายการ</th>
+            <th class="ctr">หน่วย</th>
+            <th class="num">ปริมาณ</th>
+            <th class="num">วัสดุ/หน่วย</th>
+            <th class="num">แรง/หน่วย</th>
+            <th class="num">รวมวัสดุ</th>
+            <th class="num">รวมแรง</th>
+            <th class="num">รวมทั้งสิ้น</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="boq-body">
+        </tbody>
+      </table>
+    </div>
+    <div class="add-row-wrap">
+      <button class="add-row-btn" onclick="addRow()">
+        <span style="font-size:18px;line-height:1">+</span> คลิกเพื่อเพิ่มรายการใหม่
+      </button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- SUMMARY -->
+    <div class="summary-card">
+      <div class="summary-header">📊 สรุปงบประมาณ</div>
+      <div class="summary-body">
+        <div class="sum-row">
+          <span class="sum-label">รวมค่าวัสดุ</span>
+          <span class="sum-value mat" id="sum-mat">฿ 0</span>
+        </div>
+        <div class="sum-row">
+          <span class="sum-label">รวมค่าแรง</span>
+          <span class="sum-value lab" id="sum-lab">฿ 0</span>
+        </div>
+        <div class="sum-row">
+          <span class="sum-label">ยอดรวมก่อสร้าง</span>
+          <span class="sum-value" id="sum-sub">฿ 0</span>
+        </div>
+        <div class="sum-row">
+          <span class="sum-label" id="oh-label">ค่าดำเนินการ + กำไร (15%)</span>
+          <span class="sum-value" id="sum-oh">฿ 0</span>
+        </div>
+        <div class="sum-row">
+          <span class="sum-label">ก่อน VAT</span>
+          <span class="sum-value" id="sum-prevat">฿ 0</span>
+        </div>
+        <div class="sum-row">
+          <span class="sum-label" id="vat-label">VAT (7%)</span>
+          <span class="sum-value" id="sum-vat">฿ 0</span>
+        </div>
+        <div class="sum-grand">
+          <div>
+            <div class="sum-grand-label">ราคารวม VAT</div>
+            <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:2px">Grand Total</div>
+          </div>
+          <div class="sum-grand-value" id="sum-grand">฿ 0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="settings-card">
+      <div class="settings-header">⚙️ ตั้งค่าอัตรา</div>
+      <div class="settings-body">
+        <div class="setting-row">
+          <span class="setting-label">Overhead & กำไร</span>
+          <input type="number" class="setting-input" id="oh-rate" value="15" min="0" max="100" step="0.5" oninput="recalcAll()"> %
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">VAT</span>
+          <input type="number" class="setting-input" id="vat-rate" value="7" min="0" max="100" step="0.5" oninput="recalcAll()"> %
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">สกุลเงิน</span>
+          <select class="setting-input" style="width:90px" onchange="recalcAll()">
+            <option>฿ THB</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORY BREAKDOWN -->
+    <div class="breakdown-card">
+      <div class="breakdown-header">📂 แยกตามหมวดงาน</div>
+      <div class="breakdown-body" id="breakdown-body">
+        <div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">
+          ยังไม่มีรายการ
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA — extracted from Excel BOQ_Clean_Template_fixed.xlsx
+// ═══════════════════════════════════════════════════════════════
+const CATEGORIES = [
+  ["งานโครงสร้าง","DATA_CONCRETE"],
+  ["งานก่ออิฐ-ฉาบปูน","DATA_PLASTER"],
+  ["งานทาสี","DATA_PAINT"],
+  ["งานระบบไฟฟ้า","DATA_ELECTRICAL"],
+  ["งานโครงหลังคา","DATA_ROOF"],
+  ["งานพื้น-กระเบื้อง","DATA_FLOOR"],
+  ["งานประตู-หน้าต่าง","DATA_DOOR"],
+  ["งานระบบประปา","DATA_PLUMBING"],
+  ["งานรื้อถอน","DATA_DEMOLISH"],
+  ["งานเบ็ดเตล็ด","DATA_MISC"],
+  ["งานเตรียมการ","DATA_PREP"],
+  ["งานบันได-ราวกันตก","DATA_STAIR"]
+];
+
+const DATA = {
+  DATA_CONCRETE:[
+    ["เสาเข็ม Micro Pile 0.18x0.18x18m","ต้น",9500,1000],
+    ["คอนกรีต คสล. 280 ksc. (ฐานราก+เสา+คาน+พื้น)","ลบ.ม.",2800,950],
+    ["ไม้แบบ คสล. ทุกส่วน","ตร.ม.",220,200],
+    ["เหล็กเส้น RB6","กก.",30,20],
+    ["เหล็กเส้น DB10","กก.",30,20],
+    ["เหล็กเส้น DB12","กก.",30,20],
+    ["เหล็กเส้น DB16","กก.",30,20],
+    ["เหล็กเส้น DB20","กก.",30,20],
+    ["ลวดผูกเหล็ก","กก.",60,0],
+    ["งานดินขุด+ดินถม+ปรับระดับ","ตร.ม.",0,600],
+    ["งานทำระบบกันดินชั่วคราว","เหมา",20000,15000],
+    ["ค่าเช่าเครื่องจักร/เครน","ครั้ง",13500,0]
+  ],
+  DATA_PLASTER:[
+    ["ผนังก่ออิฐบล็อค หนา 7.5 ซม.","ตร.ม.",220,180],
+    ["ผนังก่ออิฐมวลเบา G4 หนา 7.5 ซม.","ตร.ม.",260,180],
+    ["ผนังก่ออิฐมวลเบา G4 หนา 10 ซม.","ตร.ม.",290,190],
+    ["งานฉาบผนัง 2 ด้าน ปูนฉาบลูกดิ่งแดง","ตร.ม.",120,150],
+    ["งานฉาบ Skim Coat ปูนลูกดิ่งเหลือง","ตร.ม.",80,120],
+    ["งานเสาเอ็นทับหลัง คสล.","ม.",80,120],
+    ["ผนังเบา SCG กั้นห้อง","ตร.ม.",350,150],
+    ["ค่าอุปกรณ์สิ้นเปลือง งานก่อ-ฉาบ","เหมา",2000,0]
+  ],
+  DATA_PAINT:[
+    ["งานทาสีภายนอก TOA / Dulux","ตร.ม.",120,80],
+    ["งานทาสีภายใน TOA / Dulux","ตร.ม.",90,70],
+    ["งานทาสีน้ำมันบานประตู-วงกบ","ตร.ม.",180,120],
+    ["งานทาสีรองพื้นกันสนิม Jotun","ตร.ม.",150,100],
+    ["งานสีน้ำมันเงา Jotun Gardex Enamel","ตร.ม.",200,120],
+    ["งานทาสีโครงเหล็กหลังคา","ตร.ม.",120,120],
+    ["งานตั้งนั่งร้านสำหรับงานทาสี","ตร.ม.",150,100]
+  ],
+  DATA_ELECTRICAL:[
+    ["เดินสายไฟ IEC01 2.5 mm² ร้อยท่อ","ม.",45,35],
+    ["เดินสายไฟ IEC01 4 mm² ร้อยท่อ","ม.",65,35],
+    ["ติดตั้งสวิตช์และปลั๊กมาตรฐาน","จุด",350,250],
+    ["ติดตั้งดาวน์ไลท์ LED 7W","ดวง",280,150],
+    ["ติดตั้งแผงไฟฟ้า Consumer Unit","ชุด",3500,1500],
+    ["ท่อร้อยสาย PVC 3/4\"","ม.",25,20],
+    ["เดินสาย LAN CAT6","ม.",35,30]
+  ],
+  DATA_ROOF:[
+    ["อะเส/จันทัน เหล็กกล่องดำ 100x50x2.3 mm.","กก.",32,25],
+    ["แป เหล็กกล่องดำ 50x25x2.3 mm.","กก.",32,25],
+    ["แผ่นหลังคา Metal Sheet + ฉนวนกันความร้อน","ตร.ม.",650,400],
+    ["แผ่นหลังคา CPAC Monier Concrete Tile","ตร.ม.",480,350],
+    ["รางน้ำฝน PVC + ชุดท่อน้ำทิ้ง","ม.",1150,300],
+    ["งานครอบสันหลังคา + พ่นสีหลังคาเดิม","เหมา",18000,12000],
+    ["งานรื้อโครงหลังคาเดิม","ตร.ม.",0,450]
+  ],
+  DATA_FLOOR:[
+    ["กระเบื้องพื้น 60x60 ซม. Grade A","ตร.ม.",380,250],
+    ["กระเบื้องผนัง 30x60 ซม. Grade A","ตร.ม.",320,300],
+    ["กระเบื้องโมเสค ห้องน้ำ 20x20 ซม.","ตร.ม.",420,350],
+    ["พื้นลามิเนต 8 mm. AC3","ตร.ม.",450,200],
+    ["Topping คอนกรีตปรับระดับ หนา 5 ซม.","ตร.ม.",180,120],
+    ["งานรื้อกระเบื้องพื้นเดิม","ตร.ม.",0,450]
+  ],
+  DATA_DOOR:[
+    ["ประตู UPVC บานเดี่ยว 80x200 ซม.","ชุด",8500,1500],
+    ["ประตู UPVC บานคู่ 160x200 ซม.","ชุด",15000,2000],
+    ["หน้าต่างกระจกอะลูมิเนียม 120x110 ซม.","ชุด",4800,1200],
+    ["ประตูกระจกอะลูมิเนียมบานสวิง 90x200","ชุด",12000,2000],
+    ["ราวกันตก สแตนเลส SUS304","ม.",1800,600],
+    ["งานรื้อประตู-หน้าต่างเดิม","ชุด",0,500]
+  ],
+  DATA_PLUMBING:[
+    ["ถังเก็บน้ำบนดิน 1500L GRANITO DWT","ชุด",8500,2000],
+    ["ปั๊มน้ำอัตโนมัติ 400W MITSUBISHI","ชุด",4500,1500],
+    ["ท่อ PVC น้ำดี Class 13.5 ขนาด 1/2\"","ม.",45,60],
+    ["ท่อ PVC น้ำทิ้ง Class 8.5 ขนาด 4\"","ม.",120,80],
+    ["สุขภัณฑ์ชักโครก 2 ชิ้น","ชุด",4500,1500],
+    ["อ่างล้างหน้าแบบแขวน + ก๊อก","ชุด",3200,1200],
+    ["ฝักบัวอาบน้ำ + ก๊อกผสม","ชุด",5500,1500]
+  ],
+  DATA_DEMOLISH:[
+    ["งานทำรั้วชั่วคราว + ตาข่ายกันฝุ่น","เหมา",0,20000],
+    ["ค่าขนและนำขยะทิ้ง","เหมา",0,15000],
+    ["งานรื้อผนังก่ออิฐ","ตร.ม.",0,450],
+    ["งานรื้อพื้น คสล.+กระเบื้อง","ตร.ม.",0,600],
+    ["งาน Protection พื้น ผ้าใบ+ไม้อัด","ตร.ม.",200,80],
+    ["งานรื้อ/ย้ายถังน้ำดี","เหมา",0,1500],
+    ["งานรื้อเคาน์เตอร์เดิม","เหมา",0,4000]
+  ],
+  DATA_MISC:[
+    ["ค่าอุปกรณ์สิ้นเปลือง รวมทุกหมวด","เหมา",5000,0],
+    ["งานทำความสะอาดหน้างาน Final Clean","เหมา",0,8000],
+    ["ค่าสาธารณูปโภคระหว่างก่อสร้าง","เหมา",3000,0],
+    ["ป้ายโครงการ","ชุด",1500,500],
+    ["งานสำรวจและทดสอบดิน","เหมา",15000,0]
+  ],
+  DATA_PREP:[
+    ["งานทำรั้วชั่วคราว + ตาข่ายกันฝุ่น","เหมา",0,20000],
+    ["งาน Protection พื้นด้วยผ้าใบ+ไม้อัด","ตร.ม.",200,80],
+    ["ค่าขนและนำขยะทิ้ง (ทุกหมวด)","เหมา",0,15000],
+    ["งานตั้งนั่งร้านชั่วคราว","ตร.ม.",150,100],
+    ["ป้ายโครงการ","ชุด",1500,500]
+  ],
+  DATA_STAIR:[
+    ["งานบันไดเหล็ก พร้อมราวกันตก สแตนเลส","ชุด",45000,15000],
+    ["ราวกันตก สแตนเลส SUS304 ออกแบบพิเศษ","ม.",1800,600],
+    ["งานปรับผิวบันไดเดิม ปูกระเบื้อง","ลูก",800,400],
+    ["งานรื้อบันไดเดิม","เหมา",0,5000],
+    ["ราวจับผนัง สแตนเลส SUS304 ขนาด 1.5\"","ม.",950,350]
+  ]
+};
+
+// Map category name → sheet key
+const CAT_MAP = {};
+CATEGORIES.forEach(([cat, sheet]) => { CAT_MAP[cat] = sheet; });
+
+// ── State ──────────────────────────────────────────────────────
+let rowId = 0;
+
+// ── Helpers ────────────────────────────────────────────────────
+function fmt(n) {
+  if (!n && n !== 0) return '—';
+  return n.toLocaleString('th-TH', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+function fmtFull(n) {
+  return '฿\u00A0' + fmt(n);
+}
+function numVal(id) {
+  return parseFloat(document.getElementById(id).value) || 0;
+}
+
+// ── Add a new BOQ row ───────────────────────────────────────────
+function addRow(data = null) {
+  rowId++;
+  const id = rowId;
+  const tbody = document.getElementById('boq-body');
+  const tr = document.createElement('tr');
+  tr.id = `row-${id}`;
+  tr.dataset.id = id;
+
+  const catOptions = CATEGORIES.map(([cat]) =>
+    `<option value="${cat}">${cat}</option>`
+  ).join('');
+
+  tr.innerHTML = `
+    <td class="seq">${id}</td>
+    <td class="cat-cell">
+      <select id="cat-${id}" onchange="onCatChange(${id})">
+        <option value="">— เลือกหมวด —</option>
+        ${catOptions}
+      </select>
+    </td>
+    <td class="item-cell">
+      <select id="item-${id}" onchange="onItemChange(${id})">
+        <option value="">— เลือกรายการ —</option>
+      </select>
+    </td>
+    <td class="unit-cell" id="unit-${id}">—</td>
+    <td><input type="number" class="qty-input" id="qty-${id}" min="0" step="0.01" placeholder="0" oninput="onQtyChange(${id})"></td>
+    <td class="num-cell mat" id="mrate-${id}">—</td>
+    <td class="num-cell lab" id="lrate-${id}">—</td>
+    <td class="num-cell mat" id="mtotal-${id}">—</td>
+    <td class="num-cell lab" id="ltotal-${id}">—</td>
+    <td class="num-cell total total-cell-bg" id="linetotal-${id}">—</td>
+    <td><button class="delete-btn" onclick="deleteRow(${id})" title="ลบ">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+
+  // If pre-filling data
+  if (data) {
+    const catSel = document.getElementById(`cat-${id}`);
+    catSel.value = data.cat;
+    buildItemDropdown(id, data.cat);
+    const itemSel = document.getElementById(`item-${id}`);
+    itemSel.value = data.item;
+    document.getElementById(`qty-${id}`).value = data.qty;
+    applyItemData(id);
+    recalcRow(id);
+  }
+
+  updateRowCount();
+  recalcAll();
+  return id;
+}
+
+// ── Category changed → rebuild item dropdown ───────────────────
+function onCatChange(id) {
+  const cat = document.getElementById(`cat-${id}`).value;
+  buildItemDropdown(id, cat);
+  clearRowValues(id);
+  recalcAll();
+}
+
+function buildItemDropdown(id, cat) {
+  const itemSel = document.getElementById(`item-${id}`);
+  itemSel.innerHTML = '<option value="">— เลือกรายการ —</option>';
+  if (!cat) return;
+  const sheet = CAT_MAP[cat];
+  if (!sheet || !DATA[sheet]) return;
+  DATA[sheet].forEach(([desc]) => {
+    const opt = document.createElement('option');
+    opt.value = desc; opt.textContent = desc;
+    itemSel.appendChild(opt);
+  });
+}
+
+// ── Item selected → fill Unit + Rates ─────────────────────────
+function onItemChange(id) {
+  applyItemData(id);
+  recalcRow(id);
+  recalcAll();
+}
+
+function applyItemData(id) {
+  const cat  = document.getElementById(`cat-${id}`)?.value;
+  const item = document.getElementById(`item-${id}`)?.value;
+  if (!cat || !item) { clearRowValues(id); return; }
+  const sheet = CAT_MAP[cat];
+  const rows  = DATA[sheet] || [];
+  const found = rows.find(([d]) => d === item);
+  if (!found) { clearRowValues(id); return; }
+  const [, unit, mat, lab] = found;
+  document.getElementById(`unit-${id}`).textContent  = unit;
+  document.getElementById(`mrate-${id}`).textContent = fmt(mat);
+  document.getElementById(`lrate-${id}`).textContent = fmt(lab);
+  document.getElementById(`mrate-${id}`).dataset.val  = mat;
+  document.getElementById(`lrate-${id}`).dataset.val  = lab;
+}
+
+function clearRowValues(id) {
+  ['unit','mrate','lrate','mtotal','ltotal','linetotal'].forEach(p => {
+    const el = document.getElementById(`${p}-${id}`);
+    if (el) { el.textContent = '—'; el.dataset.val = ''; }
+  });
+}
+
+// ── Qty changed ────────────────────────────────────────────────
+function onQtyChange(id) {
+  recalcRow(id);
+  recalcAll();
+}
+
+function recalcRow(id) {
+  const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value) || 0;
+  const mrate = parseFloat(document.getElementById(`mrate-${id}`)?.dataset.val) || 0;
+  const lrate = parseFloat(document.getElementById(`lrate-${id}`)?.dataset.val) || 0;
+  const mt = qty * mrate;
+  const lt = qty * lrate;
+  const tt = mt + lt;
+
+  const hasItem = document.getElementById(`item-${id}`)?.value;
+  if (!hasItem || qty <= 0) {
+    document.getElementById(`mtotal-${id}`).textContent    = '—';
+    document.getElementById(`ltotal-${id}`).textContent    = '—';
+    document.getElementById(`linetotal-${id}`).textContent = '—';
+  } else {
+    document.getElementById(`mtotal-${id}`).textContent    = fmt(mt);
+    document.getElementById(`ltotal-${id}`).textContent    = fmt(lt);
+    document.getElementById(`linetotal-${id}`).textContent = fmt(tt);
+    document.getElementById(`mtotal-${id}`).dataset.val    = mt;
+    document.getElementById(`ltotal-${id}`).dataset.val    = lt;
+    document.getElementById(`linetotal-${id}`).dataset.val = tt;
+  }
+}
+
+// ── Recalc grand summary ───────────────────────────────────────
+function recalcAll() {
+  let totalMat = 0, totalLab = 0;
+  const catTotals = {};
+
+  document.querySelectorAll('#boq-body tr').forEach(tr => {
+    const id = tr.dataset.id;
+    const mt = parseFloat(document.getElementById(`mtotal-${id}`)?.dataset.val) || 0;
+    const lt = parseFloat(document.getElementById(`ltotal-${id}`)?.dataset.val) || 0;
+    const tt = mt + lt;
+    totalMat += mt;
+    totalLab += lt;
+
+    const cat = document.getElementById(`cat-${id}`)?.value;
+    if (cat && tt > 0) {
+      catTotals[cat] = (catTotals[cat] || 0) + tt;
+    }
+  });
+
+  const sub    = totalMat + totalLab;
+  const ohPct  = numVal('oh-rate') / 100;
+  const vatPct = numVal('vat-rate') / 100;
+  const oh     = sub * ohPct;
+  const preVat = sub + oh;
+  const vat    = preVat * vatPct;
+  const grand  = preVat + vat;
+
+  document.getElementById('sum-mat').textContent    = fmtFull(totalMat);
+  document.getElementById('sum-lab').textContent    = fmtFull(totalLab);
+  document.getElementById('sum-sub').textContent    = fmtFull(sub);
+  document.getElementById('sum-oh').textContent     = fmtFull(oh);
+  document.getElementById('sum-prevat').textContent = fmtFull(preVat);
+  document.getElementById('sum-vat').textContent    = fmtFull(vat);
+  document.getElementById('sum-grand').textContent  = fmtFull(grand);
+
+  document.getElementById('oh-label').textContent  =
+    `ค่าดำเนินการ + กำไร (${numVal('oh-rate')}%)`;
+  document.getElementById('vat-label').textContent =
+    `VAT (${numVal('vat-rate')}%)`;
+
+  // Breakdown
+  const bd = document.getElementById('breakdown-body');
+  const keys = Object.entries(catTotals).sort((a,b) => b[1]-a[1]);
+  if (keys.length === 0) {
+    bd.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">ยังไม่มีรายการ</div>';
+  } else {
+    const max = keys[0][1];
+    bd.innerHTML = keys.map(([cat, val]) => `
+      <div class="bk-row">
+        <div>
+          <div class="bk-cat">${cat}</div>
+          <div class="bk-bar-wrap">
+            <div class="bk-bar" style="width:${Math.round(val/max*100)}%"></div>
+          </div>
+        </div>
+        <div class="bk-val">${fmt(val)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ── Delete row ─────────────────────────────────────────────────
+function deleteRow(id) {
+  const row = document.getElementById(`row-${id}`);
+  if (row) { row.style.opacity='0'; row.style.transform='translateX(8px)';
+    row.style.transition='all .2s'; setTimeout(()=>{row.remove(); updateRowCount(); recalcAll();},200); }
+}
+
+// ── Update row count badge ─────────────────────────────────────
+function updateRowCount() {
+  const n = document.querySelectorAll('#boq-body tr').length;
+  document.getElementById('row-count').textContent = `${n} รายการ`;
+}
+
+// ── Clear all ──────────────────────────────────────────────────
+function clearAll() {
+  if (!confirm('ล้างข้อมูล BOQ ทั้งหมด?')) return;
+  document.getElementById('boq-body').innerHTML = '';
+  rowId = 0; updateRowCount(); recalcAll();
+  showToast('🗑 ล้างข้อมูลเรียบร้อย');
+}
+
+// ── Export CSV ─────────────────────────────────────────────────
+function exportCSV() {
+  const proj = document.getElementById('proj_name').value || 'BOQ';
+  const date = document.getElementById('proj_date').value || new Date().toLocaleDateString('th-TH');
+  const ohPct  = numVal('oh-rate');
+  const vatPct = numVal('vat-rate');
+
+  let csv = '\uFEFF'; // BOM for Thai
+  csv += `โครงการ,${proj}\n`;
+  csv += `ลูกค้า,${document.getElementById('proj_client').value}\n`;
+  csv += `วันที่,${date}\n\n`;
+  csv += '#,หมวดงาน,รายการ,หน่วย,ปริมาณ,วัสดุ/หน่วย,แรง/หน่วย,รวมวัสดุ,รวมแรง,รวมทั้งสิ้น\n';
+
+  let totalMat=0, totalLab=0;
+  document.querySelectorAll('#boq-body tr').forEach((tr,i) => {
+    const id = tr.dataset.id;
+    const cat  = document.getElementById(`cat-${id}`)?.value  || '';
+    const item = document.getElementById(`item-${id}`)?.value || '';
+    const unit = document.getElementById(`unit-${id}`)?.textContent || '';
+    const qty  = document.getElementById(`qty-${id}`)?.value  || '';
+    const mr   = document.getElementById(`mrate-${id}`)?.dataset.val  || 0;
+    const lr   = document.getElementById(`lrate-${id}`)?.dataset.val  || 0;
+    const mt   = document.getElementById(`mtotal-${id}`)?.dataset.val || 0;
+    const lt   = document.getElementById(`ltotal-${id}`)?.dataset.val || 0;
+    const tt   = parseFloat(mt)+parseFloat(lt);
+    totalMat  += parseFloat(mt)||0;
+    totalLab  += parseFloat(lt)||0;
+    csv += `${i+1},"${cat}","${item}",${unit},${qty},${mr},${lr},${mt},${lt},${tt||''}\n`;
+  });
+
+  const sub = totalMat+totalLab;
+  const oh  = sub*ohPct/100;
+  const pre = sub+oh;
+  const vat = pre*vatPct/100;
+  const grand = pre+vat;
+
+  csv += `\n,,,,,,,รวมวัสดุ,,${totalMat}\n`;
+  csv += `,,,,,,, รวมแรงงาน,,${totalLab}\n`;
+  csv += `,,,,,,, รวมก่อสร้าง,,${sub}\n`;
+  csv += `,,,,,,, Overhead ${ohPct}%,,${oh.toFixed(2)}\n`;
+  csv += `,,,,,,, ก่อน VAT,,${pre.toFixed(2)}\n`;
+  csv += `,,,,,,, VAT ${vatPct}%,,${vat.toFixed(2)}\n`;
+  csv += `,,,,,,, Grand Total,,${grand.toFixed(2)}\n`;
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `BOQ_${proj}_${date.replace(/\//g,'-')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('⬇ Export CSV เรียบร้อย');
+}
+
+// ── Project save (simple) ──────────────────────────────────────
+function saveProject() {
+  document.title = `BOQ — ${document.getElementById('proj_name').value || 'ใบประมาณราคา'}`;
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ── Init: add 5 default empty rows ────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  for (let i=0; i<5; i++) addRow();
+  // Default date
+  const now = new Date();
+  document.getElementById('proj_date').value =
+    `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()+543}`;
+});
+</script>
+</body>
+</html>
